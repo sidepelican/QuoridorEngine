@@ -1,4 +1,4 @@
-#if canImport(Dispatch)
+#if !os(WASI)
 import Foundation
 import Dispatch
 
