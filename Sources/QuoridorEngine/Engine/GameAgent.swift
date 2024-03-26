@@ -1,5 +1,3 @@
-import Foundation
-
 public protocol GameAgentDelegate: AnyObject {
     func didUpdateGameState(_ agent: GameAgent)
 }
@@ -69,7 +67,7 @@ public final class GameAgent {
     // MARK: - Private
 
     private func requestActionToTurnPlayer() {
-        dispatchPrecondition(condition: .onQueue(.main))
+        QEdispatchPreconditionOnMainQueue()
         let actionContext = EvaluateActionContext(
             agent: self,
             state: currentState
@@ -94,7 +92,7 @@ public final class GameAgent {
                 runOnMainThread {
                     self.delegate?.didUpdateGameState(self)
                 }
-                DispatchQueue.main.async {
+                QEDispatchQueue.main.async {
                     self.requestActionToTurnPlayer()
                 }
                 return nil
@@ -106,7 +104,7 @@ public final class GameAgent {
         case .success(let state):
             newState = state
         case .failure(let error):
-            DispatchQueue.main.async {
+            QEDispatchQueue.main.async {
                 self.requestActionToTurnPlayer()
             }
             return error
@@ -124,7 +122,7 @@ public final class GameAgent {
             return nil
         }
 
-        DispatchQueue.main.async {
+        QEDispatchQueue.main.async {
             self.requestActionToTurnPlayer()
         }
         return nil

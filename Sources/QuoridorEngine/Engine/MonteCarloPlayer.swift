@@ -1,5 +1,12 @@
 import Algorithms
-import Foundation
+
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#elseif canImport(WASILibc)
+import WASILibc
+#endif
 
 public final class MonteCarloPlayer: PlayerController {
     public init(
@@ -11,7 +18,7 @@ public final class MonteCarloPlayer: PlayerController {
     }
 
     private let agent: GameAgent
-    private let queue = DispatchQueue(label: "MonteCarloPlayer", qos: .userInitiated)
+    private let queue = QEDispatchQueue(label: "MonteCarloPlayer", qos: .userInitiated)
     private let mcts = MonteCarloTreeSearch()
 
     // MARK: - PlayerController
@@ -21,7 +28,7 @@ public final class MonteCarloPlayer: PlayerController {
     public func onRequestedTurnAction(evaluateAction: @escaping (MutatingAction) -> MutatingAction.Error?) {
         queue.async {
             let player = self.agent.currentState.currentPlayer
-            let s = Date()
+            let s = SuspendingClock.now
             self.mcts.setGameState(self.agent.currentState)
             let mutation = self.mcts.searchBestMove(simulationCount: 7500)
 
@@ -35,7 +42,7 @@ public final class MonteCarloPlayer: PlayerController {
                 if child.skippedCount > 0 { buf += " (skipped: \(child.skippedCount))" }
                 print(buf)
             }
-            print("elapsed:", Date().timeIntervalSince(s))
+            print("elapsed:", s.duration(to: .now))
             print("estimated AI \(player) winRatio:", self.mcts.root.maxWinRateChild?.winRatio ?? "")
         }
     }
@@ -249,13 +256,13 @@ private final class MonteCarloTreeSearch {
         }
     }
 
-    private let rolloutSyncQueue = DispatchQueue(label: "MonteCarloPlayer.rolloutSync", qos: .userInteractive)
+    private let rolloutSyncQueue = QEDispatchQueue(label: "MonteCarloPlayer.rolloutSync", qos: .userInteractive)
     private func concurrentRollout(candidateNodes: [Node]) {
         // rolloutChunkSizeの数まで絞って並列でrolloutする
         let selectedNodes = candidateNodes.randomSample(count: rolloutChunkSize, using: &gs[0])
         var rolloutResults: [(node: Node, resultScene: GameState)?] = .init(repeating: nil, count: selectedNodes.count)
 
-        DispatchQueue.concurrentPerform(iterations: selectedNodes.count) { i in
+        QEDispatchQueue.concurrentPerform(iterations: selectedNodes.count) { i in
             var g = rolloutSyncQueue.sync {
                 gs[i]
             }

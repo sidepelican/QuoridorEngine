@@ -1,18 +1,9 @@
-#if !os(WASI)
-import Foundation
-import Dispatch
-
+#if os(WASI)
 func runOnMainThread(_ task: @escaping () -> ()) {
-    if Thread.isMainThread {
-        task()
-    } else {
-        DispatchQueue.main.async {
-            task()
-        }
-    }
+    task()
 }
-#else
-struct DispatchQueue {
+
+struct QEDispatchQueue {
     enum Qos {
         case background
         case utility
@@ -22,7 +13,7 @@ struct DispatchQueue {
         case unspecified
     }
 
-    static let main = DispatchQueue(label: "main", qos: .userInteractive)
+    static let main = QEDispatchQueue(label: "main", qos: .userInteractive)
 
     var label: String
     var qos: Qos
@@ -46,14 +37,27 @@ struct DispatchQueue {
     }
 }
 
+@inlinable
+func QEdispatchPreconditionOnMainQueue() {
+}
+#else
+import Foundation
+import Dispatch
+
 func runOnMainThread(_ task: @escaping () -> ()) {
-    task()
+    if Thread.isMainThread {
+        task()
+    } else {
+        DispatchQueue.main.async {
+            task()
+        }
+    }
 }
 
-enum DispatchCondition {
-    case onQueue(DispatchQueue)
-}
+typealias QEDispatchQueue = DispatchQueue
 
-func dispatchPrecondition(condition: DispatchCondition) {
+@inlinable
+func QEdispatchPreconditionOnMainQueue() {
+    dispatchPrecondition(condition: .onQueue(.main))
 }
 #endif

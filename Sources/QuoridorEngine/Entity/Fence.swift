@@ -1,5 +1,3 @@
-import Foundation
-
 public struct Fence: Equatable {
     @frozen public enum Orientation {
         case horizontal

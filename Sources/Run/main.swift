@@ -1,4 +1,6 @@
+#if canImport(Dispatch)
 import Foundation
+#endif
 import QuoridorEngine
 
 print("Quoridor!")

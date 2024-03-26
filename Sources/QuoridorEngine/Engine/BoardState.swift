@@ -1,5 +1,4 @@
 import Algorithms
-import Foundation
 
 //
 // 盤面の左下を原点とする。GL座標空間と同じ

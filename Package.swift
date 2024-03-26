@@ -1,10 +1,10 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.9
 
 import PackageDescription
 
 let package = Package(
     name: "QuoridorEngine",
-    platforms: [.macOS(.v10_15), .iOS(.v13)],
+    platforms: [.macOS(.v13), .iOS(.v16)],
     products: [
         .library(name: "QuoridorEngine", targets: ["QuoridorEngine"]),
         .executable(name: "Run", targets: ["Run"]),

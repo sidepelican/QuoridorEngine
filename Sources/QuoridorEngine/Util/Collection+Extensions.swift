@@ -1,5 +1,3 @@
-import Foundation
-
 extension Collection {
     func randomElementForSmall<T: RandomNumberGenerator>(using generator: inout T) -> Element? {
         if count <= 1 {

@@ -1,5 +1,3 @@
-import Foundation
-
 public struct Pawn: Equatable {
     public var id: PlayerID
     public var goal: GoalSide
